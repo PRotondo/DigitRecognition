@@ -14,5 +14,6 @@ to speed up the training significantly.
 
 
 ##Note
+
 I will soon add modules to read and write images from common file
 types. For instances the ones in the folder ''pgm''.
