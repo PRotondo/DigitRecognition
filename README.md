@@ -13,7 +13,7 @@ picture was reduced from its original size (28x28) to 10x10
 to speed up the training significantly.
 
 
-##Note
+## Note
 
 I will soon add modules to read and write images from common file
 types. For instances the ones in the folder ''pgm''.
