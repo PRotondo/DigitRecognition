@@ -20,9 +20,9 @@ public class DigitRecognition {
 //										"train-labels.idx1-ubyte");
 //		dataSet.preprocess(R,C);
 //		Nnet neuralNetwork = new Nnet(nlayers,sizes);
-//		neuralNetwork.train(dataSet, 1000, 0.3, 0.1);
+//		neuralNetwork.train(dataSet, 10000, 0.3, 0.1);
 
-		Nnet neuralNetwork = new Nnet("MNistNN867.txt");
+		Nnet neuralNetwork = new Nnet("MNistNN10-4.txt");
 		
 		MNISTdataset dataSetTest = new MNISTdataset("t10k-images.idx3-ubyte",
 				"t10k-labels.idx1-ubyte");
@@ -39,6 +39,6 @@ public class DigitRecognition {
 				good += 1;
 		}
 		System.out.println("Accuracy " + (double)good  / tot);
-//		neuralNetwork.save("MNistNN2.txt");
+//		neuralNetwork.save("MNistNN10-4.txt");
 	}
 }
