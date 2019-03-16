@@ -2,7 +2,7 @@ package ReadData;
 
 abstract public class TestCase {
 	/* returns the input data with the addition of the bias +1 at index 0 */
-	public double [] getTestData()
+	public float [] getTestData()
 	{
 		return null;
 	}

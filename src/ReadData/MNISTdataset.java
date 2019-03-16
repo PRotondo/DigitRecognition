@@ -65,12 +65,13 @@ public class MNISTdataset extends DataSet {
 
 		for (int i = 0; i < M; i++)
 			cases[i] = new Image(R,C,inInputs);
-		
+
 		inInputs.close();
 	}
 	
 	public void preprocess(int R2, int C2)
 	{		
+		this.shuffle();
 		for (int i = 0; i < cases.length; i++)
 		{
 			((Image)cases[i]).reduceImage(R2,C2);

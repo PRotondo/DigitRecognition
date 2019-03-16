@@ -75,14 +75,14 @@ public class Image extends TestCase {
 	}
 
 	@Override
-	public double [] getTestData()
+	public float [] getTestData()
 	{
-		double [] ans = new double[R*C+1];
-		ans[0] = 1.0; // bias unit of the input
+		float [] ans = new float[R*C+1];
+		ans[0] = 1.0f; // bias unit of the input
 		for (int i = 0; i < R; i++)
 			for (int j = 0; j < C; j++)
 				/* normalize to the interval [0,1] */
-				ans[i*C + j+1] = gray[i][j] / 255.0;
+				ans[i*C + j+1] = gray[i][j] / 255.0f;
 		return ans;
 	}
 	@Override
@@ -90,4 +90,6 @@ public class Image extends TestCase {
 	{
 		return label;
 	}
+	
+
 }

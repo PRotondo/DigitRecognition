@@ -27,20 +27,22 @@ public class Nnet {
 	int [] sizes;
 	/*	The entry Theta[k][i][j] represents the weight from node i (layer k) to node j (layer k+1) */
 	/*  The index 0 always corresponds to the bias unit */
-	double [][][] Theta;
+	float [][][] Theta;
 	/* The evaluated values after FP */
 	/* A[k][0] == 1 always as this corresponds to the bias unit */
-	double [][] A,Z;
+	float [][] A,Z;
+	/* size of the batch to train the Nnetwork */
+	int batchSize = 1000;
 	// TODO: make class for this
 	/* Activation function */
-	double activationFunction(double z)
+	float activationFunction(float z)
 	{
-		return 1/(1+Math.exp(-z));
+		return (float) (1/(1+Math.exp(-z)));
 	}
-	double activationFunctionDerivative(double z)
+	float activationFunctionDerivative(float z)
 	{
-		double gz = this.activationFunction(z);
-		return gz*(1.0-gz);
+		float gz = this.activationFunction(z);
+		return gz*(1.0f-gz);
 	}
 	/* constructor */
 	/* TODO: create arrays */
@@ -48,15 +50,20 @@ public class Nnet {
 	{
 		this.nlayers = nlayers;
 		this.sizes = sizes;
-		A = new double[nlayers+2][];
-		Z = new double[nlayers+2][];
+		A = new float[nlayers+2][];
+		Z = new float[nlayers+2][];
 		for (int i = 0; i <= nlayers+1;i++)
 		{
-			A[i] = new double[sizes[i]+1];
-			Z[i] = new double[sizes[i]+1];
+			A[i] = new float[sizes[i]+1];
+			Z[i] = new float[sizes[i]+1];
 		}
 	}
-	void loadInput(double [] input)
+	Nnet(int nlayers, int [] sizes, int batchSize)
+	{
+		this(nlayers,sizes);
+		this.batchSize = batchSize;
+	}
+	void loadInput(float [] input)
 	{
 		assert (sizes[0]+1 == input.length);
 		/* inputs are loaded into the first position */
@@ -68,11 +75,11 @@ public class Nnet {
 		for (int k = 0; k <= nlayers; k++)
 		{
 			/* bias unit */
-			A[k+1][0] = 1.0;
+			A[k+1][0] = 1.0f;
 			/* the rest */
 			for (int j = 1; j <= sizes[k+1]; j++)
 			{
-				double z = 0.0;
+				float z = 0.0f;
 				for (int i = 0; i <= sizes[k]; i++)
 					z += Theta[k][i][j] * A[k][i];
 				A[k+1][j] = activationFunction(z);
@@ -83,12 +90,12 @@ public class Nnet {
 	}
 	/* contribution to the gradient (non normalized) of a test case */
 	/* accumulate the results in D */
-	void gradientBackPropagationTestCase(double [][][] D, int label)
+	void gradientBackPropagationTestCase(float [][][] D, int label)
 	{		/* errors */
-		double [][] error = new double[nlayers+2][];
+		float [][] error = new float[nlayers+2][];
 		/* fill the arrays */
 		for (int k = 0; k <= nlayers+1; k++)
-			error[k] = new double[sizes[k]+1];
+			error[k] = new float[sizes[k]+1];
 		/* set errors for the output */
 		for (int j = 1; j <= sizes[nlayers+1]; j++)
 		{
@@ -101,7 +108,7 @@ public class Nnet {
 		{
 			for (int j = 1; j <= sizes[k]; j++)
 			{
-				error[k][j] = 0.0;
+				error[k][j] = 0.0f;
 				for (int i = 1; i <= sizes[k+1]; i++)
 					error[k][j] += error[k+1][i] * Theta[k][j][i];
 				error[k][j] *= this.activationFunctionDerivative(Z[k][j]);																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													
@@ -114,18 +121,18 @@ public class Nnet {
 
 	
 	/* compute gradient */
-	double [][][] gradientBackPropagation(DataSet dataSet, double lambda)
+	float [][][] gradient(DataSet dataSet, float lambda)
 	{
 		
-		double [][][] D = new double[nlayers+1][][];
+		float [][][] D = new float[nlayers+1][][];
 		for (int k = 0;k <= nlayers; k++)
 		{
-			D[k] = new double[sizes[k]+1][sizes[k+1]+1];
+			D[k] = new float[sizes[k]+1][sizes[k+1]+1];
 			for (int i = 0; i <= sizes[k]; i++)
 				for (int j = 1; j <= sizes[k+1]; j++)
-					D[k][i][j] = 0.0;
+					D[k][i][j] = 0.0f;
 		}	
-		TestCase [] cases = dataSet.getTrainingCases();
+		TestCase [] cases = dataSet.getBatch(batchSize);
 		int M = cases.length;
 		for (int t = 0; t < M; t++)
 		{
@@ -138,22 +145,22 @@ public class Nnet {
 		{
 			for (int i = 0; i <= sizes[k]; i++)
 				for (int j = 1; j <= sizes[k+1]; j++)
-					D[k][i][j] = (D[k][i][j]+(i==0 ? 0.0:(lambda*Theta[k][i][j])))/M; // 
+					D[k][i][j] = (D[k][i][j]+(i==0 ? 0.0f:(lambda*Theta[k][i][j])))/M; // 
 		}	
 		return D;
 	}
 	/* gradient descent */
-	void train(DataSet dataSet, int iter, double alpha, double lambda)
+	void train(DataSet dataSet, int iter, float alpha, float lambda)
 	{
-		double epsilon = 0.5;
-		Theta = new double[nlayers+1][][];
+		float epsilon = 0.5f;
+		Theta = new float[nlayers+1][][];
 		for (int k = 0;k <= nlayers; k++)
 		{
-			Theta[k] = new double[sizes[k]+1][sizes[k+1]+1];
+			Theta[k] = new float[sizes[k]+1][sizes[k+1]+1];
 			for (int i = 0; i <= sizes[k]; i++)
 				for (int j = 1; j <= sizes[k+1]; j++)
 				{
-					Theta[k][i][j] = Math.random()*epsilon*2 - epsilon;
+					Theta[k][i][j] = (float) (Math.random()*epsilon*2 - epsilon);
 //					System.err.println(Theta[k][i][j]);
 				}
 		}
@@ -162,11 +169,12 @@ public class Nnet {
 //		System.out.println(activationFunction(1));
 //		System.out.println(activationFunction(-1));
 
-		double [][][] D;
+		float [][][] D;
 		for (int t = 0; t < iter; t++)
 		{
 			System.err.println("Iteration #"+t);
-			D = this.gradientBackPropagation(dataSet, lambda);
+//			alpha = Math.min(alpha,1/(float)(t+1));
+			D = this.gradient(dataSet, lambda);
 			for (int k = 0;k <= nlayers; k++)
 				for (int i = 0; i <= sizes[k]; i++)
 					for (int j = 1; j <= sizes[k+1]; j++)
@@ -184,7 +192,7 @@ public class Nnet {
 		this.loadInput(testCase.getTestData());
 		this.forwardPropagation();
 		int res = 0;
-		double certainty = 0.0;
+		float certainty = 0.0f;
 		for (int i = 1; i <= sizes[this.nlayers+1]; System.out.println(i + " " + A[nlayers+1][i++]))
 			if (A[nlayers+1][i]>certainty)
 			{
@@ -196,12 +204,12 @@ public class Nnet {
 		return res;
 	}
 	
-	public int evaluate(double [] data)
+	public int evaluate(float [] data)
 	{
 		this.loadInput(data);
 		this.forwardPropagation();
 		int res = 0;
-		double certainty = 0.0;
+		float certainty = 0.0f;
 		for (int i = 1; i <= sizes[this.nlayers+1]; System.out.println(i + " " + A[nlayers+1][i++]))
 			if (A[nlayers+1][i]>certainty)
 			{
@@ -236,20 +244,20 @@ public class Nnet {
 		sizes = new int[nlayers+2];
 		for (int i = 0; i <= 1+this.nlayers; i++)
 			sizes[i] = in.nextInt();
-		Theta = new double[nlayers+1][][];
+		Theta = new float[nlayers+1][][];
 		for (int k = 0;k <= nlayers; k++)
 		{
-			Theta[k] = new double[sizes[k]+1][sizes[k+1]+1];
+			Theta[k] = new float[sizes[k]+1][sizes[k+1]+1];
 			for (int i = 0; i <= sizes[k]; i++)
 				for (int j = 1; j <= sizes[k+1]; j++)
-					Theta[k][i][j] = in.nextDouble();
+					Theta[k][i][j] = in.nextFloat();
 		}
-		A = new double[nlayers+2][];
-		Z = new double[nlayers+2][];
+		A = new float[nlayers+2][];
+		Z = new float[nlayers+2][];
 		for (int i = 0; i <= nlayers+1;i++)
 		{
-			A[i] = new double[sizes[i]+1];
-			Z[i] = new double[sizes[i]+1];
+			A[i] = new float[sizes[i]+1];
+			Z[i] = new float[sizes[i]+1];
 		}
 		in.close();
 	}
